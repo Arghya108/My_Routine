@@ -10,8 +10,14 @@ HTML · CSS · Vanilla JavaScript · localStorage · Google Fonts (DM Sans + Spa
 How to use
 Download the HTML file. Open it in any browser. That is it. No server, no npm, no internet required after download. Your schedule and all edits persist automatically in your browser's local storage.
 
-<img width="1897" height="874" alt="image" src="https://github.com/user-attachments/assets/4c7bcf43-3475-4040-a80a-47131d6b80ee" />
+🦉Dark Mode:
+<img width="1902" height="872" alt="image" src="https://github.com/user-attachments/assets/0988f912-f4f0-46b9-9148-162c00e06d8a" />
 
 ------------------------------------------------------------------------------------------------------------------------------------
 
+☀️Light Mode:
+<img width="1896" height="871" alt="image" src="https://github.com/user-attachments/assets/c8f3d2d8-bfb7-47ea-acaf-be10b13f9ad8" />
+
+
+------------------------------------------------------------------------------------------------------------------------------------
 <img width="1894" height="871" alt="image" src="https://github.com/user-attachments/assets/374e46a2-63c8-405b-af7a-610be094ee0a" />
