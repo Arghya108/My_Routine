@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Arghya's Weekly Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--surface3:#2a2e42;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#e8eaf6;--text2:#9e9eb8;--text3:#555570;
+  --accent:#5c6bc0;--accent2:#7986cb;--edit-color:#f9a825;
+  --shadow:rgba(0,0,0,0.35);--tip-shadow:rgba(0,0,0,0.6);
+}
+body.light{
+  --bg:#f5f6fa;--surface:#ffffff;--surface2:#eef0f7;--surface3:#e3e6f0;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.18);
+  --text:#1a1d2e;--text2:#5a5d7a;--text3:#aaaacc;
+  --accent:#3f51b5;--accent2:#5c6bc0;--edit-color:#e65100;
+  --shadow:rgba(0,0,0,0.12);--tip-shadow:rgba(0,0,0,0.2);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.25s,color 0.25s}
+
+header{
+  padding:18px 28px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  position:sticky;top:0;background:var(--bg);z-index:50;
+}
+header h1{font-family:'Space Mono',monospace;font-size:16px;font-weight:700}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.theme-btn{
+  font-size:18px;background:transparent;border:1.5px solid var(--border2);
+  border-radius:8px;padding:6px 10px;cursor:pointer;transition:background 0.2s;line-height:1;
+}
+.theme-btn:hover{background:var(--surface2)}
+.edit-btn{
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 18px;border-radius:8px;cursor:pointer;
+  border:1.5px solid var(--border2);background:transparent;color:var(--text);transition:all 0.2s;
+}
+.edit-btn:hover{background:var(--surface2)}
+.edit-btn.active{background:var(--edit-color);color:#1a1200;border-color:var(--edit-color)}
+.edit-hint{font-size:12px;color:var(--text3);display:none}
+.edit-hint.show{display:block}
+.save-status{font-size:11px;font-family:'Space Mono',monospace;color:#66bb6a;opacity:0;transition:opacity 0.4s}
+.save-status.show{opacity:1}
+
+.legend{display:flex;flex-wrap:wrap;gap:7px;padding:12px 28px;border-bottom:1px solid var(--border)}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);background:var(--surface);padding:5px 11px;border-radius:20px;border:1px solid var(--border)}
+.leg-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+
+.add-class-bar{display:none;padding:10px 28px;border-bottom:1px solid var(--border);background:rgba(249,168,37,0.05)}
+.add-class-bar.show{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.add-class-bar span{font-size:12px;color:var(--edit-color)}
+.add-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:7px;background:var(--edit-color);color:#1a1200;border:none;cursor:pointer}
+
+.main{padding:16px 28px 48px;overflow-x:auto}
+.schedule-wrap{display:flex;gap:0;min-width:680px}
+.time-col{width:60px;flex-shrink:0;position:relative;padding-top:44px}
+.time-label{position:absolute;right:8px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text3);transform:translateY(-50%);white-space:nowrap}
+.h-line{position:absolute;left:60px;right:0;height:1px;background:var(--border);width:9999px;pointer-events:none}
+.h-line-half{opacity:0.35}
+.days-grid{flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.day-col{position:relative}
+.day-header{font-size:13px;font-weight:600;color:var(--text2);text-align:center;padding:8px 0;height:44px;display:flex;align-items:center;justify-content:center;letter-spacing:1.5px;text-transform:uppercase}
+.day-inner{position:relative}
+
+.block{position:absolute;left:2px;right:2px;border-radius:8px;padding:7px 8px;overflow:hidden;box-shadow:0 2px 10px var(--shadow);transition:transform 0.15s,box-shadow 0.15s,background 0.25s}
+.block-title{font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.block-time{font-size:11px;font-family:'Space Mono',monospace;opacity:0.8;line-height:1.5;margin-top:2px}
+.block-meta{font-size:11px;opacity:0.65;line-height:1.3;margin-top:1px}
+.block.editable{cursor:pointer;outline:2px dashed rgba(249,168,37,0.5)}
+.block.editable:hover{transform:scale(1.03);box-shadow:0 4px 18px var(--shadow);outline-color:var(--edit-color)}
+.del-btn{display:none;position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;line-height:18px;text-align:center;cursor:pointer;font-weight:700;z-index:5}
+.block.editable:hover .del-btn{display:block}
+
+.gap-block{position:absolute;left:2px;right:2px;border-radius:6px;background:var(--surface2);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;transition:background 0.15s,border-color 0.15s}
+.gap-block.clickable{cursor:pointer}
+.gap-block.clickable:hover{background:rgba(92,107,192,0.15);border-color:rgba(92,107,192,0.4)}
+.gap-label{font-size:11px;color:var(--text3);text-align:center;padding:2px 4px;line-height:1.5;pointer-events:none}
+.gap-custom{background:rgba(92,107,192,0.12)!important;border:1px solid rgba(92,107,192,0.4)!important}
+.gap-custom .gap-label{color:#9fa8da;font-weight:600;font-size:12px}
+
+.free-total{font-size:11px;font-family:'Space Mono',monospace;color:var(--text3);text-align:center;padding:6px 0 0}
+
+.tip{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--text);pointer-events:none;z-index:400;display:none;box-shadow:0 8px 28px var(--tip-shadow);line-height:1.7;max-width:210px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:1000;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;width:330px;box-shadow:0 20px 60px var(--tip-shadow);animation:pop 0.18s ease;max-height:90vh;overflow-y:auto}
+@keyframes pop{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+.modal h3{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-bottom:4px}
+.modal .sub{font-size:12px;color:var(--text2);margin-bottom:18px}
+.form-row{margin-bottom:13px}
+.form-row label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+.form-row input,.form-row select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent)}
+.form-row select option{background:var(--surface2)}
+.form-row.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row.two>div label{display:block}
+
+.color-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2.5px solid transparent;transition:border-color 0.15s,transform 0.1s}
+.color-swatch:hover{transform:scale(1.12)}
+.color-swatch.selected{border-color:#fff}
+
+.custom-color-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
+.custom-color-wrap label{font-size:12px;color:var(--text2)}
+.custom-color-wrap input[type=color]{width:36px;height:36px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;padding:2px}
+.custom-text-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none}
+.custom-text-input:focus{border-color:var(--accent)}
+
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--border);transition:all 0.15s}
+.btn-cancel{background:transparent;color:var(--text2)}
+.btn-cancel:hover{background:var(--surface2)}
+.btn-clear{background:transparent;color:#ef5350;border-color:rgba(239,83,80,0.35)}
+.btn-clear:hover{background:rgba(239,83,80,0.1)}
+.btn-save{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-save:hover{background:var(--accent2)}
+.btn-danger{background:transparent;color:#ef5350;border-color:rgba(239,83,80,0.35)}
+.btn-danger:hover{background:rgba(239,83,80,0.1)}
+
+.time-hint{font-size:11px;color:var(--text3);margin-top:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📅 Arghya's Routine</h1>
+  <div class="header-right">
+    <span class="save-status" id="save-status">✓ Saved</span>
+    <span class="edit-hint" id="edit-hint">Click any block or gap to edit</span>
+    <button class="theme-btn" id="theme-btn" title="Toggle light/dark mode">🌙</button>
+    <button class="edit-btn" id="edit-btn">✏️ Edit Mode</button>
+  </div>
+</header>
+
+<div class="legend" id="legend"></div>
+
+<div class="add-class-bar" id="add-bar">
+  <span>Edit mode —</span>
+  <button class="add-btn" id="add-class-btn">+ Add New Entry</button>
+</div>
+
+<div class="main">
+  <div class="schedule-wrap">
+    <div class="time-col" id="time-col"></div>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<!-- GAP MODAL -->
+<div class="overlay" id="gap-overlay">
+  <div class="modal">
+    <h3 id="gap-title">Label this gap</h3>
+    <p class="sub" id="gap-sub"></p>
+    <div class="form-row">
+      <label>Activity type</label>
+      <select id="gap-type">
+        <option value="">— select —</option>
+        <option>📖 Study</option>
+        <option>✏️ Assignment</option>
+        <option>💻 Project work</option>
+        <option>💪 Gym / Workout</option>
+        <option>😴 Break / Rest</option>
+        <option>🍛 Meal</option>
+        <option>🤲 Prayer</option>
+        <option>📚 Reading</option>
+        <option>🚗 Travel</option>
+        <option>✍️ Custom</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Custom label (optional)</label>
+      <input type="text" id="gap-label" placeholder="e.g. DSA practice, nap..."/>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-clear" id="gap-clear">Clear</button>
+      <button class="btn btn-cancel" id="gap-cancel">Cancel</button>
+      <button class="btn btn-save" id="gap-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLASS EDIT MODAL -->
+<div class="overlay" id="cls-overlay">
+  <div class="modal">
+    <h3 id="cls-modal-title">Edit Entry</h3>
+    <p class="sub">All changes save to local storage instantly</p>
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" id="cls-name" placeholder="e.g. Computer Networks"/>
+    </div>
+    <div class="form-row two">
+      <div>
+        <label>Day</label>
+        <select id="cls-day">
+          <option>Sun</option><option>Mon</option><option>Tue</option>
+          <option>Wed</option><option>Thu</option><option>Fri</option>
+        </select>
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="cls-type">
+          <option>Theory</option><option>Lab</option><option>Personal</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row two">
+      <div>
+        <label>Start time</label>
+        <input type="text" id="cls-start" placeholder="e.g. 8:00"/>
+        <div class="time-hint">Format: H:MM (8:00, 14:40)</div>
+      </div>
+      <div>
+        <label>End time</label>
+        <input type="text" id="cls-end" placeholder="e.g. 9:30"/>
+        <div class="time-hint">Format: H:MM (9:30, 16:10)</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Room / Location</label>
+      <input type="text" id="cls-room" placeholder="e.g. DN0809 or Home"/>
+    </div>
+    <div class="form-row">
+      <label>Background color</label>
+      <div class="color-row" id="cls-color-row"></div>
+      <div class="custom-color-wrap">
+        <label>Custom:</label>
+        <input type="color" id="cls-custom-bg" value="#90CAF9"/>
+        <input type="text" class="custom-text-input" id="cls-custom-text" placeholder="Text color e.g. #0D47A1"/>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" id="cls-delete">Delete</button>
+      <button class="btn btn-cancel" id="cls-cancel">Cancel</button>
+      <button class="btn btn-save" id="cls-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ENTRY MODAL -->
+<div class="overlay" id="add-overlay">
+  <div class="modal">
+    <h3>Add New Entry</h3>
+    <p class="sub">Works for classes, gym, meals — anything</p>
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" id="new-name" placeholder="e.g. Gym, Algorithms, Prayer..."/>
+    </div>
+    <div class="form-row two">
+      <div>
+        <label>Day</label>
+        <select id="new-day">
+          <option>Sun</option><option>Mon</option><option>Tue</option>
+          <option>Wed</option><option>Thu</option><option>Fri</option>
+        </select>
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="new-type">
+          <option>Theory</option><option>Lab</option><option>Personal</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row two">
+      <div>
+        <label>Start time</label>
+        <input type="text" id="new-start" placeholder="e.g. 10:00"/>
+        <div class="time-hint">Format: H:MM (8:00, 14:40)</div>
+      </div>
+      <div>
+        <label>End time</label>
+        <input type="text" id="new-end" placeholder="e.g. 11:00"/>
+        <div class="time-hint">Format: H:MM (9:30, 16:10)</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Room / Location (optional)</label>
+      <input type="text" id="new-room" placeholder="e.g. 9310 or Home or Gym"/>
+    </div>
+    <div class="form-row">
+      <label>Background color</label>
+      <div class="color-row" id="new-color-row"></div>
+      <div class="custom-color-wrap">
+        <label>Custom:</label>
+        <input type="color" id="new-custom-bg" value="#90CAF9"/>
+        <input type="text" class="custom-text-input" id="new-custom-text" placeholder="Text color e.g. #0D47A1"/>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" id="new-cancel">Cancel</button>
+      <button class="btn btn-save" id="new-save">Add Entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAY_START=8*60, DAY_END=22*60, TOTAL_MIN=DAY_END-DAY_START, GRID_H=840;
+
+const PALETTE=[
+  {bg:"#EF9A9A",text:"#B71C1C"},
+  {bg:"#90CAF9",text:"#0D47A1"},
+  {bg:"#A5D6A7",text:"#1B5E20"},
+  {bg:"#CE93D8",text:"#4A148C"},
+  {bg:"#FFCC80",text:"#E65100"},
+  {bg:"#80DEEA",text:"#006064"},
+  {bg:"#FFAB91",text:"#BF360C"},
+  {bg:"#F48FB1",text:"#880E4F"},
+  {bg:"#C5E1A5",text:"#33691E"},
+  {bg:"#FFF59D",text:"#F57F17"},
+  {bg:"#B0BEC5",text:"#263238"},
+  {bg:"#BCAAA4",text:"#3E2723"},
+];
+
+const DEFAULT_CLASSES=[
+  {id:"c1", day:"Sun",start:"8:00", end:"9:30",  course:"Business Communication",type:"Theory",room:"DN0809",colorIdx:0,customBg:"",customText:""},
+  {id:"c2", day:"Tue",start:"8:00", end:"9:30",  course:"Business Communication",type:"Theory",room:"DN0809",colorIdx:0,customBg:"",customText:""},
+  {id:"c3", day:"Tue",start:"12:40",end:"14:40", course:"Web Technologies",      type:"Theory",room:"9306",  colorIdx:1,customBg:"",customText:""},
+  {id:"c4", day:"Thu",start:"12:40",end:"15:00", course:"Web Technologies",      type:"Lab",   room:"DS0206",colorIdx:1,customBg:"",customText:""},
+  {id:"c5", day:"Mon",start:"8:00", end:"10:00", course:"Computer Graphics",     type:"Theory",room:"9310",  colorIdx:2,customBg:"",customText:""},
+  {id:"c6", day:"Thu",start:"8:00", end:"10:20", course:"Computer Graphics",     type:"Lab",   room:"DS0102",colorIdx:2,customBg:"",customText:""},
+  {id:"c7", day:"Mon",start:"10:20",end:"12:20", course:"Computer Networks",     type:"Theory",room:"9209",  colorIdx:3,customBg:"",customText:""},
+  {id:"c8", day:"Thu",start:"10:20",end:"12:40", course:"Computer Networks",     type:"Lab",   room:"DN0110",colorIdx:3,customBg:"",customText:""},
+  {id:"c9", day:"Mon",start:"14:40",end:"16:10", course:"Research Methodology",  type:"Theory",room:"3107",  colorIdx:4,customBg:"",customText:""},
+  {id:"c10",day:"Wed",start:"14:40",end:"16:10", course:"Research Methodology",  type:"Theory",room:"3107",  colorIdx:4,customBg:"",customText:""},
+];
+
+const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri"];
+
+let classes=[], gapData={}, editMode=false, activeGap=null, activeCls=null;
+let selColor=0, selNewColor=0;
+let useCustomColor=false, useNewCustomColor=false;
+
+function loadState(){
+  try{
+    const sc=localStorage.getItem("arghya_classes2");
+    const sg=localStorage.getItem("arghya_gaps2");
+    classes=sc?JSON.parse(sc):JSON.parse(JSON.stringify(DEFAULT_CLASSES));
+    gapData=sg?JSON.parse(sg):{};
+  }catch(e){
+    classes=JSON.parse(JSON.stringify(DEFAULT_CLASSES));
+    gapData={};
+  }
+}
+function saveState(){
+  try{
+    localStorage.setItem("arghya_classes2",JSON.stringify(classes));
+    localStorage.setItem("arghya_gaps2",JSON.stringify(gapData));
+    flashSaved();
+  }catch(e){}
+}
+function flashSaved(){
+  const el=document.getElementById("save-status");
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),1800);
+}
+
+function toMin(t){
+  t=t.trim();
+  const[h,m]=t.split(":").map(Number);
+  return h*60+(m||0);
+}
+function minToY(m){return((m-DAY_START)/TOTAL_MIN)*GRID_H}
+function minToH(m){return(m/TOTAL_MIN)*GRID_H}
+function fmt(m){
+  let h=Math.floor(m/60),min=m%60,ap=h>=12?"PM":"AM";
+  if(h>12)h-=12;if(h===0)h=12;
+  return h+":"+(min<10?"0":"")+min+" "+ap;
+}
+function uid(){return"c"+Date.now()+Math.floor(Math.random()*999)}
+
+function getBlockColor(cls){
+  if(cls.customBg&&cls.customBg!==""){
+    return{bg:cls.customBg,text:cls.customText||"#1a1a2e"};
+  }
+  return PALETTE[cls.colorIdx||0]||PALETTE[0];
+}
+
+function buildLegend(){
+  const el=document.getElementById("legend");
+  el.innerHTML="";
+  const seen={};
+  classes.forEach(c=>{
+    if(!seen[c.course]){
+      seen[c.course]=true;
+      const col=getBlockColor(c);
+      el.innerHTML+=`<div class="leg"><div class="leg-dot" style="background:${col.bg}"></div>${c.course}</div>`;
+    }
+  });
+}
+
+function buildTimeCol(){
+  const col=document.getElementById("time-col");
+  col.innerHTML="";
+  col.style.cssText=`height:${GRID_H+44}px;position:relative;padding-top:44px;`;
+  for(let m=DAY_START;m<=DAY_END;m+=60){
+    const y=minToY(m)+44;
+    const lbl=document.createElement("div");
+    lbl.className="time-label";lbl.style.top=y+"px";lbl.textContent=fmt(m);
+    col.appendChild(lbl);
+    const line=document.createElement("div");
+    line.className="h-line";line.style.top=y+"px";
+    col.appendChild(line);
+  }
+  for(let m=DAY_START+30;m<DAY_END;m+=60){
+    const y=minToY(m)+44;
+    const line=document.createElement("div");
+    line.className="h-line h-line-half";line.style.top=y+"px";
+    col.appendChild(line);
+  }
+}
+
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.style.display="block";moveTip(e)}
+function moveTip(e){
+  let x=e.clientX+16,y=e.clientY+14;
+  if(x+220>window.innerWidth)x=e.clientX-230;
+  if(y+100>window.innerHeight)y=e.clientY-100;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+}
+document.addEventListener("mousemove",moveTip);
+document.addEventListener("mouseleave",()=>{tip.style.display="none"});
+
+function render(){
+  buildLegend();
+  buildTimeCol();
+  const grid=document.getElementById("days-grid");
+  grid.innerHTML="";
+
+  DAYS.forEach(day=>{
+    const dayClasses=classes.filter(c=>c.day===day).sort((a,b)=>toMin(a.start)-toMin(b.start));
+    const col=document.createElement("div");col.className="day-col";
+    const hdr=document.createElement("div");hdr.className="day-header";hdr.textContent=day;
+    col.appendChild(hdr);
+    const inner=document.createElement("div");inner.className="day-inner";inner.style.height=GRID_H+"px";
+
+    dayClasses.forEach(cls=>{
+      const s=toMin(cls.start),e=toMin(cls.end);
+      const y=minToY(s),h=Math.max(minToH(e-s),26);
+      const c=getBlockColor(cls);
+      const b=document.createElement("div");
+      b.className="block"+(editMode?" editable":"");
+      b.style.cssText=`top:${y}px;height:${h}px;background:${c.bg};`;
+      b.innerHTML=`<div class="block-title" style="color:${c.text}">${cls.course}</div>
+        <div class="block-time" style="color:${c.text}">${fmt(s)}–${fmt(e)}</div>
+        <div class="block-meta" style="color:${c.text}">[${cls.type}] ${cls.room}</div>
+        ${editMode?`<div class="del-btn" data-id="${cls.id}">×</div>`:""}`;
+      if(editMode){
+        b.addEventListener("click",(ev)=>{if(ev.target.classList.contains("del-btn"))return;openClsModal(cls)});
+        const db=b.querySelector(".del-btn");
+        if(db)db.addEventListener("click",(ev)=>{
+          ev.stopPropagation();
+          if(confirm(`Delete "${cls.course}"?`)){classes=classes.filter(c=>c.id!==cls.id);saveState();render();}
+        });
+      } else {
+        b.addEventListener("mouseenter",e2=>showTip(e2,`<b>${cls.course}</b><br/>${cls.type} · ${cls.room}<br/>${fmt(s)} – ${fmt(e)}`));
+        b.addEventListener("mouseleave",()=>{tip.style.display="none"});
+      }
+      inner.appendChild(b);
+    });
+
+    // gap blocks
+    const slots=[{s:DAY_START,e:DAY_START}];
+    dayClasses.forEach(c=>slots.push({s:toMin(c.start),e:toMin(c.end)}));
+    slots.push({s:DAY_END,e:DAY_END});
+    slots.sort((a,b)=>a.s-b.s);
+    let freeTotal=0;
+    for(let i=0;i<slots.length-1;i++){
+      const gs=slots[i].e,ge=slots[i+1].s;
+      if(ge<=gs)continue;
+      const dur=ge-gs;freeTotal+=dur;
+      const y=minToY(gs),h=Math.max(minToH(dur),20);
+      const key=`${day}_${gs}_${ge}`;
+      const existing=gapData[key];
+      const g=document.createElement("div");
+      g.className="gap-block"+(editMode?" clickable":"")+(existing?" gap-custom":"");
+      g.style.cssText=`top:${y}px;height:${h}px;`;
+      const labelHtml=existing?existing.label:fmt(gs)+"<br/>"+Math.round(dur)+"m free";
+      g.innerHTML=`<div class="gap-label">${labelHtml}</div>`;
+      if(editMode){
+        g.addEventListener("click",()=>openGapModal({key,start:gs,end:ge,day,dur,el:g}));
+      } else {
+        g.addEventListener("mouseenter",e2=>showTip(e2,`Free: ${fmt(gs)} – ${fmt(ge)}<br/>Duration: ${Math.floor(dur/60)}h ${dur%60}m`));
+        g.addEventListener("mouseleave",()=>{tip.style.display="none"});
+      }
+      inner.appendChild(g);
+    }
+    col.appendChild(inner);
+    const ft=document.createElement("div");ft.className="free-total";
+    ft.textContent=`${Math.floor(freeTotal/60)}h ${freeTotal%60}m free`;
+    col.appendChild(ft);
+    grid.appendChild(col);
+  });
+}
+
+// EDIT MODE TOGGLE
+document.getElementById("edit-btn").addEventListener("click",()=>{
+  editMode=!editMode;
+  const btn=document.getElementById("edit-btn");
+  btn.textContent=editMode?"✅ Done Editing":"✏️ Edit Mode";
+  btn.classList.toggle("active",editMode);
+  document.getElementById("edit-hint").classList.toggle("show",editMode);
+  document.getElementById("add-bar").classList.toggle("show",editMode);
+  render();
+});
+
+// GAP MODAL
+function openGapModal(gap){
+  activeGap=gap;
+  const dur=gap.dur;
+  document.getElementById("gap-title").textContent=`${gap.day}  •  ${fmt(gap.start)} → ${fmt(gap.end)}`;
+  document.getElementById("gap-sub").textContent=`${Math.floor(dur/60)}h ${dur%60}m free window`;
+  const ex=gapData[gap.key];
+  document.getElementById("gap-type").value=ex?ex.type:"";
+  document.getElementById("gap-label").value=ex?ex.raw:"";
+  document.getElementById("gap-overlay").classList.add("open");
+}
+document.getElementById("gap-cancel").onclick=()=>document.getElementById("gap-overlay").classList.remove("open");
+document.getElementById("gap-overlay").addEventListener("click",e=>{if(e.target===document.getElementById("gap-overlay"))document.getElementById("gap-overlay").classList.remove("open")});
+document.getElementById("gap-save").onclick=()=>{
+  if(!activeGap)return;
+  const type=document.getElementById("gap-type").value;
+  const raw=document.getElementById("gap-label").value.trim();
+  const label=raw||(type||"Custom");
+  gapData[activeGap.key]={type,raw,label};
+  saveState();render();
+  document.getElementById("gap-overlay").classList.remove("open");
+};
+document.getElementById("gap-clear").onclick=()=>{
+  if(!activeGap)return;
+  delete gapData[activeGap.key];
+  saveState();render();
+  document.getElementById("gap-overlay").classList.remove("open");
+};
+
+// COLOR SWATCHES
+function buildSwatches(containerId,selectedIdx,onSelect){
+  const row=document.getElementById(containerId);
+  row.innerHTML="";
+  PALETTE.forEach((c,i)=>{
+    const sw=document.createElement("div");
+    sw.className="color-swatch"+(i===selectedIdx?" selected":"");
+    sw.style.background=c.bg;
+    sw.addEventListener("click",()=>{
+      row.querySelectorAll(".color-swatch").forEach(s=>s.classList.remove("selected"));
+      sw.classList.add("selected");
+      onSelect(i);
+    });
+    row.appendChild(sw);
+  });
+}
+
+// CLASS EDIT MODAL
+function openClsModal(cls){
+  activeCls=cls;
+  selColor=cls.colorIdx||0;
+  useCustomColor=!!(cls.customBg&&cls.customBg!=="");
+  document.getElementById("cls-modal-title").textContent="Edit Entry";
+  document.getElementById("cls-name").value=cls.course;
+  document.getElementById("cls-day").value=cls.day;
+  document.getElementById("cls-type").value=cls.type;
+  document.getElementById("cls-start").value=cls.start;
+  document.getElementById("cls-end").value=cls.end;
+  document.getElementById("cls-room").value=cls.room;
+  document.getElementById("cls-custom-bg").value=cls.customBg||"#90CAF9";
+  document.getElementById("cls-custom-text").value=cls.customText||"";
+  buildSwatches("cls-color-row",selColor,(i)=>{selColor=i;useCustomColor=false});
+  document.getElementById("cls-overlay").classList.add("open");
+}
+document.getElementById("cls-cancel").onclick=()=>document.getElementById("cls-overlay").classList.remove("open");
+document.getElementById("cls-overlay").addEventListener("click",e=>{if(e.target===document.getElementById("cls-overlay"))document.getElementById("cls-overlay").classList.remove("open")});
+document.getElementById("cls-delete").onclick=()=>{
+  if(!activeCls)return;
+  if(confirm(`Delete "${activeCls.course}"?`)){
+    classes=classes.filter(c=>c.id!==activeCls.id);
+    saveState();render();
+    document.getElementById("cls-overlay").classList.remove("open");
+  }
+};
+document.getElementById("cls-custom-bg").addEventListener("input",()=>{useCustomColor=true});
+document.getElementById("cls-save").onclick=()=>{
+  if(!activeCls)return;
+  const idx=classes.findIndex(c=>c.id===activeCls.id);
+  if(idx===-1)return;
+  const customBg=useCustomColor?document.getElementById("cls-custom-bg").value:"";
+  const customText=useCustomColor?document.getElementById("cls-custom-text").value.trim():"";
+  classes[idx]={
+    ...classes[idx],
+    course:document.getElementById("cls-name").value.trim()||classes[idx].course,
+    day:document.getElementById("cls-day").value,
+    type:document.getElementById("cls-type").value,
+    start:document.getElementById("cls-start").value.trim(),
+    end:document.getElementById("cls-end").value.trim(),
+    room:document.getElementById("cls-room").value.trim(),
+    colorIdx:selColor,
+    customBg,customText,
+  };
+  saveState();render();
+  document.getElementById("cls-overlay").classList.remove("open");
+};
+
+// ADD ENTRY MODAL
+document.getElementById("add-class-btn").addEventListener("click",()=>{
+  selNewColor=0;useNewCustomColor=false;
+  document.getElementById("new-name").value="";
+  document.getElementById("new-day").value="Sun";
+  document.getElementById("new-type").value="Personal";
+  document.getElementById("new-start").value="";
+  document.getElementById("new-end").value="";
+  document.getElementById("new-room").value="";
+  document.getElementById("new-custom-bg").value="#A5D6A7";
+  document.getElementById("new-custom-text").value="";
+  buildSwatches("new-color-row",0,(i)=>{selNewColor=i;useNewCustomColor=false});
+  document.getElementById("add-overlay").classList.add("open");
+});
+document.getElementById("new-cancel").onclick=()=>document.getElementById("add-overlay").classList.remove("open");
+document.getElementById("add-overlay").addEventListener("click",e=>{if(e.target===document.getElementById("add-overlay"))document.getElementById("add-overlay").classList.remove("open")});
+document.getElementById("new-custom-bg").addEventListener("input",()=>{useNewCustomColor=true});
+document.getElementById("new-save").onclick=()=>{
+  const name=document.getElementById("new-name").value.trim();
+  const start=document.getElementById("new-start").value.trim();
+  const end=document.getElementById("new-end").value.trim();
+  if(!name){alert("Please enter a name.");return;}
+  if(!start||!end){alert("Please enter start and end time.\nFormat: H:MM — example: 10:00 or 14:30");return;}
+  const s=toMin(start),e=toMin(end);
+  if(e<=s){alert("End time must be after start time.");return;}
+  if(s<DAY_START||e>DAY_END){alert(`Time must be between 8:00 and 22:00.`);return;}
+  const customBg=useNewCustomColor?document.getElementById("new-custom-bg").value:"";
+  const customText=useNewCustomColor?document.getElementById("new-custom-text").value.trim():"";
+  classes.push({
+    id:uid(),
+    course:name,
+    day:document.getElementById("new-day").value,
+    type:document.getElementById("new-type").value,
+    start,end,
+    room:document.getElementById("new-room").value.trim()||"—",
+    colorIdx:selNewColor,
+    customBg,customText,
+  });
+  saveState();render();
+  document.getElementById("add-overlay").classList.remove("open");
+};
+
+// THEME TOGGLE
+let isDark = localStorage.getItem("arghya_theme") !== "light";
+function applyTheme(){
+  document.body.classList.toggle("light", !isDark);
+  document.getElementById("theme-btn").textContent = isDark ? "🌙" : "☀️";
+}
+document.getElementById("theme-btn").addEventListener("click",()=>{
+  isDark = !isDark;
+  localStorage.setItem("arghya_theme", isDark ? "dark" : "light");
+  applyTheme();
+});
+applyTheme();
+
+loadState();
+render();
+</script>
+</body>
+</html>
